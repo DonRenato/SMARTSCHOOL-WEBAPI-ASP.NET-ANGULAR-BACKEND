@@ -12,7 +12,7 @@ namespace SmartSchool_WebApi.Controllers
         {
              try
             {
-                return Ok("Renato");
+                return Ok();
             }
             catch (Exception ex)
             {
