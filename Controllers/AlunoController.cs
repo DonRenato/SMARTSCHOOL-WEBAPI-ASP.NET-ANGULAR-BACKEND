@@ -1,6 +1,8 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SmartSchool_WebApi.Data;
+using SmartSchool_WebApi.Models;
 
 namespace SmartSchool_WebApi.Controllers
 {
@@ -8,19 +10,128 @@ namespace SmartSchool_WebApi.Controllers
     [Route("api/[controller]")]
     public class AlunoController: ControllerBase
     {
-        public AlunoController(IRepository repo){}
-        
+        private readonly IRepository _repo;
+
+        public AlunoController(IRepository repo)
+        {
+            _repo = repo;
+        }
+
         [HttpGet]
-        public IActionResult Get(){
-            
+        public async Task<IActionResult> Get()
+        {    
             try
             {
-                return Ok();
+                var result = await _repo.GetAllAlunosAsync(false);
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 return BadRequest($"Erro: {ex.Message}");
             }
+        }
+
+        [HttpGet("{alunoId}")]
+        public async Task<IActionResult> GetByAlunoId(int alunoId)
+        {    
+            try
+            {
+                var result = await _repo.GetAlunoAsyncById(alunoId, true);
+                
+                if(result == null) return NotFound("aluno não encontrado");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro: {ex.Message}");
+            }
+        }
+
+        [HttpGet("ByDisciplina/{disciplinaId}")]
+        public async Task<IActionResult> GetByDisciplinaId(int disciplinaId)
+        {    
+            try
+            {
+                var result = await _repo.GetAlunosAsyncByDisciplinaId(disciplinaId, false);
+                
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post(Aluno model)
+        {    
+            try
+            {
+                _repo.Add(model);
+                
+                if(await _repo.SaveChangesAsync()){
+                    return Ok(model);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro: {ex.Message}");
+            }
+
+            return BadRequest();
+        }
+
+        [HttpPut("{alunoId}")]
+        public async Task<IActionResult> Update(int alunoId, Aluno model)
+        {    
+            try
+            {
+               var aluno = await _repo.GetAlunoAsyncById(alunoId, false);
+
+               if(aluno == null) return NotFound();
+
+               _repo.Update(model);
+                
+               if(await _repo.SaveChangesAsync())
+               {
+                    return Ok(model);
+               }
+    
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro: {ex.Message}");
+            }
+
+            return BadRequest();
+        }
+
+         [HttpDelete("{alunoId}")]
+        public async Task<IActionResult> Delete(int alunoId)
+        {    
+            try
+            {
+               var aluno = await _repo.GetAlunoAsyncById(alunoId, false);
+
+              if(aluno == null) return NotFound("aluno não encontrado");
+
+               _repo.Delete(aluno);
+                
+               if(await _repo.SaveChangesAsync())
+               {
+                    return Ok();
+               }
+    
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro: {ex.Message}");
+            }
+
+            return BadRequest();
         }
     }
 }
