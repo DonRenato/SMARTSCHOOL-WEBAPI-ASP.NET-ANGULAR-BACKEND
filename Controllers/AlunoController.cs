@@ -1,5 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
+using SmartSchool_WebApi.Data;
 
 namespace SmartSchool_WebApi.Controllers
 {
@@ -7,6 +8,8 @@ namespace SmartSchool_WebApi.Controllers
     [Route("api/[controller]")]
     public class AlunoController: ControllerBase
     {
+        public AlunoController(IRepository repo){}
+        
         [HttpGet]
         public IActionResult Get(){
             
